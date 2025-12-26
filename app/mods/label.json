@@ -1,0 +1,12 @@
+{
+    "label": {
+            "format": "default",
+            "copies": 1,
+            "printed": false,
+            "header": "replace",
+            "subhead": "replace",
+            "body":"replace",
+            "footer": "replace"
+            
+            }
+        }

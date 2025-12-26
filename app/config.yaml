@@ -1,0 +1,26 @@
+config:
+  printer:
+    name: "Zebra4x2"
+    ip: "192.168.86.102"
+    port: 9100
+    model: "Zebra ZD620"
+    driver: "Direct ZPL"
+  jsonbin:
+    properties:
+      get_bins: "https://api.jsonbin.io/v3"
+      get_one_bin: "https://api.jsonbin.io/v3/b"
+      post_bin: "https://api.jsonbin.io/v3/b"
+      put_bin: "https://api.jsonbin.io/v3/b"
+      delete_bin: "https://api.jsonbin.io/v3/b"
+      headers:
+        Content-Type: "application/json"
+        X-Master-Key: '$2a$10$UitaCKKGGfzLfPU2djLnnub1dtROO0jYnLytIxTrno1NMHsfHZeg6'
+    inbox:
+      name: "JSONbin.IO - Inbox"
+      id: "68178d678a456b7966978665"
+      version: "latest"
+    printed:
+      name: "JSONbin.IO - Printed"
+      id: "681935c88a456b79669843e0"
+      version: "latest"
+      

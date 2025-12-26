@@ -1,0 +1,48 @@
+services:
+  zelabel:
+    build: .
+    container_name: zelabel
+    # ports:
+    #   - "5000:5000"
+    volumes:
+      - /apps/zelabel/app:/app
+    environment:
+      - FLASK_ENV=development
+    
+    labels:
+      - "traefik.enable=true"
+
+      #Stickey Sessions use if needed
+      - "traefik.http.services.zelabel.loadbalancer.sticky=true"
+      - "traefik.http.services.zelabel.loadbalancer.sticky.cookie.name=zelabel"
+      - "traefik.http.services.zelabel.loadbalancer.sticky.cookie.secure=true"
+
+      # HTTP Router (for redirecting to HTTPS)
+      - "traefik.http.routers.zelabel-http.rule=Host(`labels.vanness.life`)"
+      - "traefik.http.routers.zelabel-http.entrypoints=web"
+      - "traefik.http.routers.zelabel-http.middlewares=zelabel-https-redirect"
+
+      # HTTPS Router (for handling secure traffic)
+      - "traefik.http.routers.zelabel.rule=Host(`labels.vanness.life`)"
+      - "traefik.http.routers.zelabel.entrypoints=websecure"
+      - "traefik.http.routers.zelabel.tls=true"
+      - "traefik.http.routers.zelabel.tls.certresolver=letsencrypt"
+
+      # Redirect HTTP to HTTPS
+      - "traefik.http.middlewares.zelabel-https-redirect.redirectscheme.scheme=https"
+
+      # Service definition
+      - "traefik.http.services.zelabel.loadbalancer.server.port=8001"
+
+      # Add Headers to Inform container of HTTPS
+      - "traefik.http.middlewares.zelabel-https-headers.headers.customrequestheaders.X-Forwarded-Proto=https"
+      - "traefik.http.middlewares.zelabel-https-headers.headers.customrequestheaders.X-Forwarded-Host=zelabel.pminc.me"
+      - "traefik.http.middlewares.zelabel-https-headers.headers.customrequestheaders.X-Forwarded-For"
+      - "traefik.http.routers.zelabel.middlewares=zelabel-https-headers"
+    networks: 
+      - traefik
+
+networks:
+  traefik:
+    external: true
+    attachable: true

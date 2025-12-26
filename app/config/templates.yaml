@@ -1,0 +1,108 @@
+templates:
+  box-label:
+    name: "Box Label"
+    description: "Box label with bold centered title and footer text"
+    fields:
+    - id: "headline"
+      label: "Title"
+      type: "text"
+      placeholder: "Enter title"
+      style:
+        font_height: 6
+        font_width: 6
+        justify: "C"
+        start_y: 10
+        max_chars: 20
+    - id: "footer"
+      label: "Footer"
+      type: "text"
+      placeholder: "Enter footer text"
+      style:
+        font_height: 3
+        font_width: 3
+        justify: "C"
+        start_y: 30
+        max_chars: 30
+  default:
+    name: "Standard Label"
+    description: "Standard 4x2 label layout"
+    fields:
+    - id: "headline"
+      label: "Headline"
+      type: "text"
+      placeholder: "Enter headline"
+      style:
+        font_height: 5
+        font_width: 5
+        justify: "C"
+        start_y: 2
+        max_chars: 25
+    - id: "subhead"
+      label: "Sub-Headline"
+      type: "text"
+      placeholder: "Enter sub-headline"
+      style:
+        font_height: 4
+        font_width: 4
+        justify: "C"
+        start_y: 8
+        max_chars: 30
+    - id: "body"
+      label: "Body"
+      type: "textarea"
+      placeholder: "Enter body text"
+      rows: 6
+      style:
+        font_height: 2
+        font_width: 2
+        justify: "L"
+        start_y: 12
+        max_chars: 50
+        max_lines: 5
+    - id: "footer"
+      label: "Footer"
+      type: "text"
+      placeholder: "Enter footer text"
+      style:
+        font_height: 2
+        font_width: 2
+        justify: "L"
+        start_y: 30
+        max_chars: 50
+
+  shipping:
+    name: "Shipping Label"
+    description: "Shipping label with address fields"
+    fields:
+    - id: "company"
+      label: "Company Name"
+      type: "text"
+      placeholder: "Enter company name"
+      style:
+        font_height: 5
+        font_width: 5
+        justify: "C"
+        start_y: 2
+        max_chars: 25
+    - id: "address"
+      label: "Address"
+      type: "textarea"
+      placeholder: "Enter shipping address"
+      rows: 4
+      style:
+        font_height: 3
+        font_width: 3
+        justify: "L"
+        start_y: 8
+        max_chars: 40
+        max_lines: 4
+    - id: "tracking"
+      label: "Tracking Number"
+      type: "text"
+      placeholder: "Enter tracking number"
+      style:
+        font_height: 4
+        font_width: 4
+        justify: "C"
+        start_y: 25
+        max_chars: 30

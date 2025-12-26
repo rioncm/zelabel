@@ -1,0 +1,5 @@
+zpl
+requests
+pyyaml
+#Pil-Lite
+flask

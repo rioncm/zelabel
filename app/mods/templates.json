@@ -1,0 +1,93 @@
+{
+    "templates": {
+        "default": {
+            "properties": {
+                "description": "Standard template for printing 4x2 labels in landscape layout.",
+                "units": "mm",
+                "width": 101.2,
+                "height": 50.8,
+                "margin-top": 3,
+                "margin-bottom": 0,
+                "margin-left": 5,
+                "margin-right": 5
+            },
+            "header": {
+                "line1": {
+                    "pre-text": "",
+                    "post-text": "",
+                    "text": "Main Title",
+                    "add-var": "",
+                    "justify": "C",
+                    "font_height": 5,
+                    "font_width": 5,
+                    "invert": false,
+                    "max-chars": 25,
+                    "max_lines": 1,
+                    "start-x": 0,
+                    "start-y": 2
+                },
+                "line2": {
+                    "pre-text": "",
+                    "post-text": "",
+                    "text": "Subtitle",
+                    "add-var": "",
+                    "justify": "C",
+                    "centered": true,
+                    "font_height": 4,
+                    "font_width": 4,
+                    "invert": false,
+                    "max-chars": 30,
+                    "max_lines": 1,
+                    "start-x": 0,
+                    "start-y": 8
+                }
+            },
+            "body": {
+                "line1": {
+                    "pre-text": "",
+                    "post-text": "",
+                    "text": "BODY Content",
+                    "add-var": "",
+                    "justify": "L",
+                    "font_height": 2,
+                    "font_width": 2,
+                    "invert": false,
+                    "max-chars": 50,
+                    "max_lines": 5,
+                    "start-x": 0,
+                    "start-y": 12
+                }
+            },
+            "footer": {
+                "line1": {
+                    "pre-text": "TAGS: ",
+                    "post-text": "",
+                    "text": "Test content",
+                    "add-var": "",
+                    "justify": "L",
+                    "font_height": 2,
+                    "font_width": 2,
+                    "invert": false,
+                    "max_chars": 50,
+                    "start-x": 24,
+                    "start-y": 30
+                }
+            },
+            "static": {
+                "line1": {
+                    "pre-text": "",
+                    "post-text": "",
+                    "text": "PRINTED: ",
+                    "add-var": "date",
+                    "justify": "L",
+                    "font_height": 2,
+                    "font_width": 2,
+                    "invert": false,
+                    "max_chars": 50,
+                    "start-x": 0,
+                    "start-y": 30
+                }
+            }
+        }
+    }
+}
