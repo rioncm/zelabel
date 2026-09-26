@@ -142,3 +142,11 @@ venv.bak/
 
 # macOS system files
 .DS_Store
+
+# ZeLabel v2 frontend build
+web/node_modules/
+web/dist/
+
+# Keep the non-secret builderx image targets with this project
+!.build/
+!.build/settings.conf

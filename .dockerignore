@@ -1,0 +1,13 @@
+.git
+.codex
+.mission
+.build
+archive
+app
+k8s
+docs
+tests
+web/node_modules
+web/dist
+__pycache__
+.DS_Store

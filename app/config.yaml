@@ -14,7 +14,7 @@ config:
       delete_bin: "https://api.jsonbin.io/v3/b"
       headers:
         Content-Type: "application/json"
-        X-Master-Key: '$2a$10$UitaCKKGGfzLfPU2djLnnub1dtROO0jYnLytIxTrno1NMHsfHZeg6'
+        X-Master-Key: REDACTED_ROTATE_IF_STILL_ACTIVE
     inbox:
       name: "JSONbin.IO - Inbox"
       id: "68178d678a456b7966978665"

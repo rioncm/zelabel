@@ -1,0 +1,4 @@
+interface:
+  display_name: "Mission Control"
+  short_description: "Operate missions with Mission Status v1"
+  default_prompt: "Use $mission-control to plan, resume, maintain, or accomplish a mission using the Mission Status v1 operating contract."

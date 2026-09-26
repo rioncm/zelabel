@@ -1,0 +1,4 @@
+interface:
+  display_name: "Builderx"
+  short_description: "Maintain the builderx helper workflow"
+  default_prompt: "Use $builderx to review or update the builderx helper and keep its source and documentation aligned."

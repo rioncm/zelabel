@@ -1,0 +1,123 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: zelabel
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zelabel
+  namespace: zelabel
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: zelabel
+  template:
+    metadata:
+      labels:
+        app: zelabel
+    spec:
+      containers:
+        - name: ui
+          image: harbor.vanness.me/public/zelabel-ui@sha256:48917158249ff2953e7be85053a06c0f0c794764b45314a33aa0b1b2b3cfe57c
+          ports:
+            - containerPort: 8080
+              name: ui
+          readinessProbe:
+            exec:
+              command: ["wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/"]
+          resources:
+            requests: {cpu: 20m, memory: 32Mi}
+            limits: {cpu: 250m, memory: 128Mi}
+        - name: api
+          image: harbor.vanness.me/public/zelabel-api@sha256:fbf8d85471d159a4f25642d6d0ea99db54f7691fd11dfeb981400bd7deca0359
+          env:
+            - {name: PRINTER_HOST, value: zd621.vanness.life}
+            - {name: PRINTER_PORT, value: '9100'}
+            - {name: PRINTER_DPI, value: '203'}
+            - {name: APP_ORIGIN, value: 'https://labels.vanness.life'}
+          ports:
+            - containerPort: 8001
+              name: api
+          readinessProbe:
+            exec:
+              command: ["python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8001/api/healthz', timeout=2)"]
+          resources:
+            requests: {cpu: 20m, memory: 48Mi}
+            limits: {cpu: 500m, memory: 192Mi}
+        - name: oidc
+          image: quay.io/oauth2-proxy/oauth2-proxy:v7.15.4
+          args:
+            - --provider=oidc
+            - --oidc-issuer-url=https://id.vanness.me
+            - --redirect-url=https://labels.vanness.life/oauth2/callback
+            - --http-address=0.0.0.0:4180
+            - --upstream=http://127.0.0.1:8080
+            - --email-domain=*
+            - --scope=openid profile email
+            - --skip-provider-button=true
+            - --reverse-proxy=true
+            - --cookie-secure=true
+            - --cookie-samesite=lax
+            - --cookie-name=__Host-zelabel
+            - --cookie-expire=8h
+          env:
+            - name: OAUTH2_PROXY_CLIENT_ID
+              valueFrom:
+                secretKeyRef: {name: zelabel-oidc, key: client-id}
+            - name: OAUTH2_PROXY_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef: {name: zelabel-oidc, key: client-secret}
+            - name: OAUTH2_PROXY_COOKIE_SECRET
+              valueFrom:
+                secretKeyRef: {name: zelabel-oidc, key: cookie-secret}
+          ports:
+            - containerPort: 4180
+              name: http
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: 4180
+          resources:
+            requests: {cpu: 20m, memory: 32Mi}
+            limits: {cpu: 250m, memory: 128Mi}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zelabel
+  namespace: zelabel
+spec:
+  selector:
+    app: zelabel
+  ports:
+    - {name: http, port: 80, targetPort: 4180}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: zelabel
+  namespace: zelabel
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: 'true'
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts: [labels.vanness.life]
+      secretName: zelabel-tls
+  rules:
+    - host: labels.vanness.life
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: zelabel
+                port:
+                  name: http
