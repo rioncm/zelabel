@@ -7,6 +7,8 @@ import textwrap
 
 from .templates import TEMPLATES
 
+DEFAULT_TOP_OFFSET_DOTS = 24
+
 
 class LabelError(ValueError):
     """User input does not fit a template."""
@@ -48,35 +50,39 @@ def prepare(payload):
     return template, result, copies
 
 
-def render_zpl(template, values, copies=1, dpi=203):
+def render_zpl(template, values, copies=1, dpi=203, top_offset=DEFAULT_TOP_OFFSET_DOTS):
     """Build a bounded ZPL job at either supported ZD621 resolution."""
     if dpi not in (203, 300):
         raise ValueError("PRINTER_DPI must be 203 or 300.")
+    if not 0 <= top_offset <= DEFAULT_TOP_OFFSET_DOTS:
+        raise ValueError("LABEL_TOP_OFFSET_DOTS must be between 0 and 24.")
     dot = lambda number: round(number * dpi / 203)
     commands = ["^XA", "^CI28", f"^PW{dot(template['width'])}",
                 f"^LL{dot(template['height'])}", "^LH0,0", f"^PQ{copies}",
-                f"^FO{dot(24)},0^GB{dot(template['width']-48)},0,{dot(4)}^FS"]
+                f"^FO{dot(24)},{dot(top_offset)}^GB{dot(template['width']-48)},0,{dot(4)}^FS"]
     for field in template["fields"]:
         if field["checkbox"]:
-            commands.append(f"^FO{dot(40)},{dot(field['y']+4)}^GB{dot(27)},{dot(27)},{dot(3)}^FS")
+            commands.append(f"^FO{dot(40)},{dot(field['y']+top_offset+4)}^GB{dot(27)},{dot(27)},{dot(3)}^FS")
         for index, line in enumerate(values[field["id"]]):
-            x, y, size = dot(field["x"]), dot(field["y"] + index*field["font"]*1.15), dot(field["font"])
+            x, y, size = dot(field["x"]), dot(field["y"] + top_offset + index*field["font"]*1.15), dot(field["font"])
             encoded = "".join(f"_{ord(char):02X}" if char in "^~_" else char for char in line)
             commands.append(f"^FO{x},{y}^A0N,{size},{size}^FH^FD{encoded}^FS")
     return "\n".join([*commands, "^XZ", ""])
 
 
-def render_svg(template, values):
+def render_svg(template, values, top_offset=DEFAULT_TOP_OFFSET_DOTS):
     """Show the same positions as ZPL without a third party preview service."""
+    if not 0 <= top_offset <= DEFAULT_TOP_OFFSET_DOTS:
+        raise ValueError("LABEL_TOP_OFFSET_DOTS must be between 0 and 24.")
     width, height = template["width"], template["height"]
     parts = [f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" role="img" aria-label="Label preview">',
              f'<rect width="{width}" height="{height}" fill="white"/>',
-             f'<path d="M24 2 H{width-24}" stroke="#172620" stroke-width="4"/>']
+             f'<path d="M24 {top_offset+2} H{width-24}" stroke="#172620" stroke-width="4"/>']
     for field in template["fields"]:
         if field["checkbox"]:
-            parts.append(f'<rect x="40" y="{field["y"]+4}" width="27" height="27" fill="none" stroke="#172620" stroke-width="3"/>')
+            parts.append(f'<rect x="40" y="{field["y"]+top_offset+4}" width="27" height="27" fill="none" stroke="#172620" stroke-width="3"/>')
         for index, line in enumerate(values[field["id"]]):
-            y = field["y"] + field["font"] + index*field["font"]*1.15
+            y = field["y"] + top_offset + field["font"] + index*field["font"]*1.15
             parts.append(f'<text x="{field["x"]}" y="{y}" font-family="Arial,sans-serif" font-weight="700" font-size="{field["font"]}" fill="#172620">{html.escape(line)}</text>')
     return "".join(parts) + "</svg>"
 

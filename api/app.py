@@ -13,6 +13,11 @@ app.config["MAX_CONTENT_LENGTH"] = 8192
 log = logging.getLogger(__name__)
 
 
+def top_offset():
+    """Return the physical top margin in 203-dpi equivalent dots."""
+    return int(os.environ.get("LABEL_TOP_OFFSET_DOTS", "24"))
+
+
 @app.get("/api/healthz")
 def healthz():
     return jsonify(status="ok")
@@ -27,8 +32,8 @@ def templates():
 def preview():
     try:
         template, values, _ = prepare(request.get_json(silent=True))
-        return Response(render_svg(template, values), mimetype="image/svg+xml", headers={"Cache-Control": "no-store"})
-    except LabelError as error:
+        return Response(render_svg(template, values, top_offset()), mimetype="image/svg+xml", headers={"Cache-Control": "no-store"})
+    except (LabelError, ValueError) as error:
         return jsonify(error=str(error)), 400
 
 
@@ -38,7 +43,7 @@ def print_label():
         return jsonify(error="Invalid request origin."), 403
     try:
         template, values, copies = prepare(request.get_json(silent=True))
-        zpl = render_zpl(template, values, copies, int(os.environ.get("PRINTER_DPI", "203")))
+        zpl = render_zpl(template, values, copies, int(os.environ.get("PRINTER_DPI", "203")), top_offset())
     except (LabelError, ValueError) as error:
         return jsonify(error=str(error)), 400
     try:

@@ -150,3 +150,6 @@ web/dist/
 # Keep the non-secret builderx image targets with this project
 !.build/
 !.build/settings.conf
+
+# Completed local OIDC Secret; keep only the placeholder template in Git
+k8s/secrets/zelabel-oidc-secret.yaml

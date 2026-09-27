@@ -3,7 +3,7 @@ import unittest
 from unittest.mock import patch
 
 from api.app import app
-from api.labels import LabelError, prepare, render_zpl
+from api.labels import LabelError, prepare, render_svg, render_zpl
 from api.templates import TEMPLATES
 
 
@@ -33,6 +33,18 @@ class LabelTests(unittest.TestCase):
         zpl = render_zpl(template, values)
         self.assertIn("^FDA_5EB_7EC_5FD", zpl)
         self.assertNotIn("^FDA^B", zpl)
+
+    def test_top_offset_moves_print_and_preview_within_label(self):
+        template, values, _ = prepare({"template": "storage-box", "values": {"title": "Winter decor"}})
+        for dpi in (203, 300):
+            scaled = lambda value: round(value * dpi / 203)
+            zpl = render_zpl(template, values, dpi=dpi, top_offset=24)
+            self.assertIn(f"^FO{scaled(24)},{scaled(24)}^GB", zpl)
+            self.assertIn(f"^FO{scaled(42)},{scaled(60)}^A0N", zpl)
+            self.assertIn(f"^LL{scaled(template['height'])}", zpl)
+        svg = render_svg(template, values, top_offset=24)
+        self.assertIn('d="M24 26 H788"', svg)
+        self.assertIn('x="42" y="118.0"', svg)
 
     def test_preview_escapes_html_and_never_prints(self):
         with patch("api.app.send_to_printer") as send:

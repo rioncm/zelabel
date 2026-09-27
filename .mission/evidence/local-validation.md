@@ -11,3 +11,4 @@
 
 - Owner confirmation on 2026-09-26: printer resolution is 203 dpi; Pocket ID owns user authorization. Existing image DPI defaults and OIDC boundary already match.
 - Owner confirmed `zd621.vanness.life` is the printer hostname. The API default and manifest already use it; no rebuild was required.
+- Added a standalone, placeholder-only `zelabel-oidc` Secret template. A Ruby YAML check matched its three keys to the Deployment `secretKeyRef` entries, and `kubectl create --dry-run=client --validate=false` recognized the Secret. No credential values were generated or applied.

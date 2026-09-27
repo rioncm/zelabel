@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
         - name: ui
-          image: harbor.vanness.me/public/zelabel-ui@sha256:48917158249ff2953e7be85053a06c0f0c794764b45314a33aa0b1b2b3cfe57c
+          image: harbor.vanness.me/public/zelabel-ui@sha256:f62027385749784c55ca19cf2b8fbd74c0c390802858d7913224a746500826bc
           ports:
             - containerPort: 8080
               name: ui
@@ -33,11 +33,12 @@ spec:
             requests: {cpu: 20m, memory: 32Mi}
             limits: {cpu: 250m, memory: 128Mi}
         - name: api
-          image: harbor.vanness.me/public/zelabel-api@sha256:fbf8d85471d159a4f25642d6d0ea99db54f7691fd11dfeb981400bd7deca0359
+          image: harbor.vanness.me/public/zelabel-api@sha256:19d0310e449528884896c6d4814a08420b4eff4b694f63554aefa30d57d6c8f2
           env:
             - {name: PRINTER_HOST, value: zd621.vanness.life}
             - {name: PRINTER_PORT, value: '9100'}
             - {name: PRINTER_DPI, value: '203'}
+            - {name: LABEL_TOP_OFFSET_DOTS, value: '24'}
             - {name: APP_ORIGIN, value: 'https://labels.vanness.life'}
           ports:
             - containerPort: 8001

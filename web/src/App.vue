@@ -22,23 +22,36 @@ onMounted(async () => {
   } catch (e) { error.value = e.message }
 })
 
-watch(selectedId, () => { values.value = {}; preview.value = ''; error.value = ''; notice.value = '' })
 let timer
-watch(values, () => { clearTimeout(timer); timer = setTimeout(updatePreview, 250) }, { deep: true })
+let previewRequest = 0
+watch(selectedId, () => { previewRequest++; clearTimeout(timer); values.value = {}; preview.value = ''; previewBusy.value = false; error.value = ''; notice.value = '' })
+watch(values, () => {
+  previewRequest++
+  clearTimeout(timer)
+  if (!Object.values(values.value).some(Boolean)) { preview.value = ''; previewBusy.value = false }
+  timer = setTimeout(() => updatePreview(previewRequest), 250)
+}, { deep: true })
 
 function payload() { return { template: selectedId.value, values: values.value, copies: Number(copies.value) } }
 function useExample() { values.value = { ...example[selectedId.value] }; notice.value = ''; error.value = '' }
-function clear() { values.value = {}; copies.value = 1; preview.value = ''; error.value = ''; notice.value = '' }
+function clearFields() { values.value = {}; preview.value = ''; previewBusy.value = false; error.value = ''; notice.value = '' }
+function clearField(id) {
+  values.value[id] = ''
+  error.value = ''
+  notice.value = ''
+  document.getElementById(`field-${id}`)?.focus()
+}
+function clear() { clearFields(); copies.value = 1 }
 
-async function updatePreview() {
+async function updatePreview(requestId) {
   if (!selected.value || !Object.values(values.value).some(Boolean)) { preview.value = ''; return }
   previewBusy.value = true
   try {
     const response = await fetch('/api/preview', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload()) })
-    if (!response.ok) { preview.value = ''; return }
-    preview.value = await response.text()
-  } catch { preview.value = '' }
-  finally { previewBusy.value = false }
+    const svg = response.ok ? await response.text() : ''
+    if (requestId === previewRequest) preview.value = svg
+  } catch { if (requestId === previewRequest) preview.value = '' }
+  finally { if (requestId === previewRequest) previewBusy.value = false }
 }
 
 async function printLabel() {
@@ -69,8 +82,8 @@ async function printLabel() {
             </button>
           </div>
           <form v-if="selected" @submit.prevent="printLabel">
-            <div class="section-heading content-heading"><div><span class="step">02 / CONTENT</span><h2>Make it yours.</h2></div><button type="button" class="text-button" @click="useExample">Use example</button></div>
-            <div class="fields"><label v-for="field in selected.fields" :key="field.id" class="field"><span>{{ field.label }} <span v-if="field.required" class="required">*</span></span><input v-model="values[field.id]" type="text" :placeholder="field.placeholder" :maxlength="field.maxLength" :required="field.required" autocomplete="off"><small>{{ (values[field.id] || '').length }} / {{ field.maxLength }}</small></label></div>
+            <div class="section-heading content-heading"><div><span class="step">02 / CONTENT</span><h2>Make it yours.</h2></div><div class="content-actions"><button type="button" class="text-button" @click="useExample">Use example</button><button type="button" class="text-button" :disabled="!Object.values(values).some(Boolean)" @click="clearFields">Clear fields</button></div></div>
+            <div class="fields"><div v-for="field in selected.fields" :key="field.id" class="field"><label :for="`field-${field.id}`">{{ field.label }} <span v-if="field.required" class="required">*</span></label><div class="input-wrap"><input :id="`field-${field.id}`" v-model="values[field.id]" type="text" :placeholder="field.placeholder" :maxlength="field.maxLength" :required="field.required" autocomplete="off"><button v-if="values[field.id]" type="button" class="field-clear" :aria-label="`Clear ${field.label}`" @click="clearField(field.id)"><span aria-hidden="true">×</span></button></div><small>{{ (values[field.id] || '').length }} / {{ field.maxLength }}</small></div></div>
             <div class="mobile-preview"><div class="preview-heading"><div><span class="step">LIVE PREVIEW</span><h2>Check your label.</h2></div><span class="preview-badge">{{ selected?.size }} in</span></div><div class="preview-stage"><div v-if="preview" class="preview-art" :class="{ square: selected?.size === '2×2' }" v-html="preview"></div><div v-else class="preview-empty">Add content to see your label.</div></div></div>
             <div class="actions"><label class="copies">Copies<select v-model.number="copies" aria-label="Number of copies"><option v-for="n in 10" :key="n" :value="n">{{ n }}</option></select></label><button type="button" class="clear" @click="clear">Clear</button><button class="print" type="submit" :disabled="busy">{{ busy ? 'Sending…' : 'Print label' }} <span aria-hidden="true">↗</span></button></div>
             <p v-if="error" class="message error" role="alert">{{ error }}</p><p v-if="notice" class="message success" role="status">{{ notice }}</p>
