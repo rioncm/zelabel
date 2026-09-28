@@ -15,3 +15,5 @@ Agent run 2026-09-26: added the placeholder-only OIDC Secret template and docume
 Agent run 2026-09-26: after the owner launched the deployment, diagnosed the interface timeout as an incorrect DNS target and changed only the ZeLabel CNAME to Traefik. Live pod and OIDC redirect checks passed. See [incident evidence](../../../evidence/2026-09-26-live-dns.md).
 
 Agent run 2026-09-26: owner corrected the remaining shared DNS record. An ordinary HTTPS request to ZeLabel now returns the Pocket ID redirect. Authenticated and physical-print acceptance remain open.
+
+Agent run 2026-09-27: built and published API and UI 2.0.1 with builderx to Harbor. Pinned both registry digests, server-dry-ran and applied the manifest, confirmed a 3/3 Ready pod, checked live preview coordinates and the UI bundle, and synchronized the `k3s-three/zlabel` operations manifest. The public route still redirects to Pocket ID. Physical alignment after the 24-dot offset and iPhone clear-control use remain for owner review. See [release evidence](../../../evidence/2026-09-27-label-usability.md).

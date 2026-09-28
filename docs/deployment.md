@@ -1,6 +1,6 @@
 # vnme deployment review
 
-The owner launched `k8s/zelabel.yaml` in vnme on 2026-09-26. The current deployment was observed at 1/1 available with a 3/3 Ready pod. The images are published as `harbor.vanness.me/public/zelabel-api:2.0.0` and `harbor.vanness.me/public/zelabel-ui:2.0.0`; the manifest pins their current digests. The `oidc` sidecar uses oauth2-proxy v7.15.4. Pocket ID is at `https://id.vanness.me`.
+The owner launched `k8s/zelabel.yaml` in vnme on 2026-09-26. Release 2.0.1 was rolled out on 2026-09-27 and observed at 1/1 available with a 3/3 Ready pod. The images are published as `harbor.vanness.me/public/zelabel-api:2.0.1` and `harbor.vanness.me/public/zelabel-ui:2.0.1`; the manifest pins their current digests. The `oidc` sidecar uses oauth2-proxy v7.15.4. Pocket ID is at `https://id.vanness.me`.
 
 For a fresh installation or future change:
 
@@ -11,6 +11,8 @@ For a fresh installation or future change:
 5. Rotate the historical JSONBin credential in `app/config.yaml` if it is still live. It is excluded from new images but remains in repository history.
 
 Build or rebuild with `builderx --target production --context vnme` for the API and `builderx --target ui --context vnme` for the UI. Builderx publishes images. Verify image digests and refresh the manifest pins after any rebuild before applying `k8s/zelabel.yaml`. Use `kubectl --context vnme apply --dry-run=client -f k8s/zelabel.yaml` for local schema validation; review the intended change before applying it to the live deployment.
+
+The API's `LABEL_TOP_OFFSET_DOTS` setting shifts the top rule and all template content downward by a number of 203 dpi dots. Release 2.0.1 sets it to `24` (about 3 mm) to address a clipped top line; the supported range is 0–24 dots to keep the lowest template field on the media. The SVG preview uses the same offset. A physical print is needed to confirm alignment. The UI offers a clear button inside each populated field and a Clear fields action that keeps the current template and copy count.
 
 For live acceptance, verify browser sign-in and sign-out on an iPhone, unauthenticated access denial to `/api/templates` and `/api/print`, local SVG previews, and one physical print on each stock size. Inspect paper alignment, wrapping, and copy count. A TCP send acknowledges transport only; it does not prove that a physical label printed.
 
