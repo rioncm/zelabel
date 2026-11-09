@@ -3,6 +3,33 @@ kind: Namespace
 metadata:
   name: zelabel
 ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: zelabel-config
+  namespace: zelabel
+data:
+  config.yaml: |
+    version: 1
+    printers:
+      zebra_large:
+        name: "Zebra — 4×2"
+        host: zd621.vanness.life
+        port: 9100
+        dpi: 203
+        media: "4x2"
+        top_offset_dots: 24
+      zebra_small:
+        name: "Zebra — 2×2"
+        host: REPLACE_WITH_SECOND_PRINTER_HOST
+        port: 9100
+        dpi: 203
+        media: "2x2"
+        top_offset_dots: 24
+    routing:
+      "4x2": zebra_large
+      "2x2": zebra_small
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -20,6 +47,10 @@ spec:
       labels:
         app: zelabel
     spec:
+      volumes:
+        - name: config
+          configMap:
+            name: zelabel-config
       containers:
         - name: ui
           image: harbor.vanness.me/public/zelabel-ui@sha256:f62027385749784c55ca19cf2b8fbd74c0c390802858d7913224a746500826bc
@@ -35,11 +66,12 @@ spec:
         - name: api
           image: harbor.vanness.me/public/zelabel-api@sha256:19d0310e449528884896c6d4814a08420b4eff4b694f63554aefa30d57d6c8f2
           env:
-            - {name: PRINTER_HOST, value: zd621.vanness.life}
-            - {name: PRINTER_PORT, value: '9100'}
-            - {name: PRINTER_DPI, value: '203'}
-            - {name: LABEL_TOP_OFFSET_DOTS, value: '24'}
+            - {name: ZELABEL_CONFIG, value: /etc/zelabel/config.yaml}
             - {name: APP_ORIGIN, value: 'https://labels.vanness.life'}
+          volumeMounts:
+            - name: config
+              mountPath: /etc/zelabel
+              readOnly: true
           ports:
             - containerPort: 8001
               name: api

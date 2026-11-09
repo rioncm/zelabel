@@ -1,0 +1,19 @@
+version: 1
+printers:
+  zebra_large:
+    name: "Zebra — 4×2"
+    host: zd621.vanness.life
+    port: 9100
+    dpi: 203
+    media: "4x2"
+    top_offset_dots: 24
+  zebra_small:
+    name: "Zebra — 2×2"
+    host: REPLACE_WITH_SECOND_PRINTER_HOST
+    port: 9100
+    dpi: 203
+    media: "2x2"
+    top_offset_dots: 24
+routing:
+  "4x2": zebra_large
+  "2x2": zebra_small

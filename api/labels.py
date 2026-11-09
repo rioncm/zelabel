@@ -1,7 +1,6 @@
 """Validate content and render both the local preview and print job."""
 
 import html
-import os
 import socket
 import textwrap
 
@@ -53,9 +52,9 @@ def prepare(payload):
 def render_zpl(template, values, copies=1, dpi=203, top_offset=DEFAULT_TOP_OFFSET_DOTS):
     """Build a bounded ZPL job at either supported ZD621 resolution."""
     if dpi not in (203, 300):
-        raise ValueError("PRINTER_DPI must be 203 or 300.")
+        raise ValueError("Printer dpi must be 203 or 300.")
     if not 0 <= top_offset <= DEFAULT_TOP_OFFSET_DOTS:
-        raise ValueError("LABEL_TOP_OFFSET_DOTS must be between 0 and 24.")
+        raise ValueError("Printer top_offset_dots must be between 0 and 24.")
     dot = lambda number: round(number * dpi / 203)
     commands = ["^XA", "^CI28", f"^PW{dot(template['width'])}",
                 f"^LL{dot(template['height'])}", "^LH0,0", f"^PQ{copies}",
@@ -73,7 +72,7 @@ def render_zpl(template, values, copies=1, dpi=203, top_offset=DEFAULT_TOP_OFFSE
 def render_svg(template, values, top_offset=DEFAULT_TOP_OFFSET_DOTS):
     """Show the same positions as ZPL without a third party preview service."""
     if not 0 <= top_offset <= DEFAULT_TOP_OFFSET_DOTS:
-        raise ValueError("LABEL_TOP_OFFSET_DOTS must be between 0 and 24.")
+        raise ValueError("Printer top_offset_dots must be between 0 and 24.")
     width, height = template["width"], template["height"]
     parts = [f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" role="img" aria-label="Label preview">',
              f'<rect width="{width}" height="{height}" fill="white"/>',
@@ -87,10 +86,8 @@ def render_svg(template, values, top_offset=DEFAULT_TOP_OFFSET_DOTS):
     return "".join(parts) + "</svg>"
 
 
-def send_to_printer(zpl):
+def send_to_printer(zpl, printer):
     """Send a complete job to the configured raw TCP printer endpoint."""
-    host = os.environ.get("PRINTER_HOST", "zd621.vanness.life")
-    port = int(os.environ.get("PRINTER_PORT", "9100"))
-    with socket.create_connection((host, port), timeout=5) as connection:
+    with socket.create_connection((printer["host"], printer["port"]), timeout=5) as connection:
         connection.settimeout(5)
         connection.sendall(zpl.encode("ascii"))
